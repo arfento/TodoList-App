@@ -271,23 +271,27 @@ describe("NoteForm Component", () => {
 
     // Feature: add-new-note, Property 5: Invalid save shows error per failed field and does not add note
     it("Property 5: Invalid save shows error per failed field and does not add note", () => {
-      // Invalid title: empty/whitespace or too long (> 50)
+      // Invalid title: empty/whitespace or strictly > 50 characters when trimmed
       const invalidTitleArb = fc.oneof(
         fc.constant(""),
         fc.stringMatching(/^[ \t\n\r]+$/),
-        fc.string({ minLength: 51, maxLength: 70 }),
+        fc
+          .string({ minLength: 51, maxLength: 80 })
+          .filter((s) => s.trim().length > TITLE_MAX_LENGTH),
       );
-      // Invalid content: empty/whitespace, too short (< 3), or too long (> 50)
+      // Invalid content: empty/whitespace, strictly < 3 characters, or strictly > 50 characters when trimmed
       const invalidContentArb = fc.oneof(
         fc.constant(""),
         fc.stringMatching(/^[ \t\n\r]*$/),
         fc
           .array(validCharArb, { minLength: 1, maxLength: 2 })
           .map((c) => c.join("")),
-        fc.string({ minLength: 51, maxLength: 70 }),
+        fc
+          .string({ minLength: 51, maxLength: 80 })
+          .filter((s) => s.trim().length > CONTENT_MAX_LENGTH),
       );
 
-      // Pair where AT LEAST one is invalid
+      // Pair where AT LEAST one is guaranteed invalid
       const invalidPairArb = fc.oneof(
         fc.tuple(invalidTitleArb, validContentArb),
         fc.tuple(validTitleArb, invalidContentArb),
