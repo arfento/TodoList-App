@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design document: React dengan TypeScript, React Context API untuk manajemen state, dan CSS Modules untuk styling. Pendekatan implementasi bersifat inkremental — mulai dari fondasi (struktur proyek, tipe, konstanta), lalu modul validasi sebagai fungsi murni, utilitas ID, provider context, komponen NoteForm, dan terakhir pengintegrasian seluruh komponen di App. Logika validasi diekstrak sebagai fungsi murni terpisah agar dapat diuji secara terisolasi dengan property-based testing menggunakan `fast-check`. Setiap langkah memvalidasi fungsionalitas inti melalui kode (unit test, property test, dan integration test) sebelum melanjutkan ke langkah berikutnya.
+Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design document: React dengan TypeScript, React Context API untuk manajemen state, dan CSS Modules untuk styling bergaya **Neobrutalism** (border hitam tebal, bayangan hitam tajam/_hard shadow_, dan kombinasi warna kontras tinggi seperti kuning terang `#FFE600` atau merah muda `#FF70A6`). Pendekatan implementasi bersifat inkremental — mulai dari fondasi (struktur proyek, tipe, konstanta), lalu modul validasi sebagai fungsi murni, utilitas ID, provider context, komponen NoteForm, dan terakhir pengintegrasian seluruh komponen di App. Logika validasi diekstrak sebagai fungsi murni terpisah agar dapat diuji secara terisolasi dengan property-based testing menggunakan `fast-check`. Setiap langkah memvalidasi fungsionalitas inti melalui kode (unit test, property test, dan integration test) sebelum melanjutkan ke langkah berikutnya.
 
 ## Tasks
 
@@ -11,7 +11,7 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
     - Buat struktur direktori proyek (mis. `src/components`, `src/context`, `src/logic`, `src/types`, `src/utils`)
     - Instal dependensi: `vitest`, `@testing-library/react`, `@testing-library/user-event`, `fast-check`, serta `jsdom` environment untuk Vitest
     - Konfigurasi Vitest (`vitest.config.ts`) dengan environment `jsdom` dan setup testing library
-    - Pastikan CSS Modules terkonfigurasi sesuai toolchain React+TypeScript yang dipakai
+    - Pastikan CSS Modules terkonfigurasi sesuai toolchain React+TypeScript yang dipakai untuk mendukung styling Neobrutalism
     - _Requirements: 1.1 (memungkinkan rendering komponen), 4.1 (memungkinkan manajemen state)_
 
   - [x] 1.2 Definisikan tipe, antarmuka, dan konstanta inti
@@ -75,7 +75,11 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
     - Saat Save diklik: panggil `validateTitle(titleValue)` dan `validateContent(contentValue)`; set error untuk field yang gagal
     - Bila kedua validasi lulus: panggil `addNote` (nilai yang disimpan adalah nilai yang sudah di-trim), lalu reset titleValue, contentValue, titleError, dan contentError
     - Bila validasi gagal: jangan panggil `addNote`; tampilkan Error_Message di bawah setiap field yang gagal
-    - Terapkan styling via CSS Modules (`NoteForm.module.css`) dengan Error_Message berwarna merah
+    - Terapkan styling via CSS Modules (`NoteForm.module.css`) bergaya **Neobrutalism**:
+      - Container form dengan border hitam tebal (`3px solid #000`), hard shadow (`5px 5px 0px #000`), background putih
+      - Kolom input & textarea dengan border hitam (`2px solid #000`), hard shadow (`3px 3px 0px #000`), label bold kapital
+      - Save_Button warna kontras (kuning terang `#FFE600` atau merah muda `#FF70A6`), border hitam (`2.5px solid #000`), hard shadow (`4px 4px 0px #000`), teks hitam tebal, dan efek tactile push saat ditekan (`active: translate(2px, 2px)`)
+      - Error_Message berwarna merah tegas dengan badge kontras berlatar lembut dan border hitam
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 5.1, 5.2_
 
   - [x]* 4.2 Tulis property test untuk simpan valid menambahkan catatan
@@ -102,10 +106,10 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
   - [x]* 4.5 Tulis unit tests (example-based) untuk NoteForm
     - Verifikasi render memuat ketiga elemen (Title input, Content input, Save button) — Req 1.1
     - Verifikasi controlled input: mengetik di Title/Content memperbarui nilai yang ditampilkan — Req 1.2, 1.3
-    - Verifikasi pesan error merah muncul di bawah field yang gagal saat Save diklik dengan input kosong/invalid — Req 2.1, 2.2, 3.1, 3.2
+    - Verifikasi pesan error merah dengan gaya Neobrutalism muncul di bawah field yang gagal saat Save diklik dengan input kosong/invalid — Req 2.1, 2.2, 3.1, 3.2
     - Verifikasi error hilang saat field diperbaiki menjadi valid — Req 2.3, 3.3
     - Verifikasi setelah simpan berhasil, input dikosongkan dan tidak ada error — Req 4.2
-    - Verifikasi Error_Message menggunakan class CSS yang menandakan warna merah
+    - Verifikasi Error_Message menggunakan class CSS Neobrutalism yang menandakan warna merah tegas dan styling border/kontras
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 4.2_
 
 - [x] 5. Checkpoint - Pastikan semua tes lulus
@@ -114,7 +118,7 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
 - [x] 6. Integrasikan dan hubungkan komponen
   - [x] 6.1 Hubungkan NoteForm ke dalam NoteProvider di App
     - Bungkus aplikasi dengan `NoteProvider` di `App.tsx`; render `NoteForm` di dalamnya
-    - Pastikan styling CSS Modules terhubung dengan benar
+    - Pastikan styling CSS Modules dan latar belakang kanvas Neobrutalism terhubung dengan benar
     - _Requirements: 1.1 (formulir terlihat di aplikasi), 4.1 (addNote tersedia via context)_
 
   - [x]* 6.2 Tulis integration tests untuk alur end-to-end
@@ -135,6 +139,7 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
 - Unit test memvalidasi contoh spesifik dan edge case
 - Logika validasi diekstrak sebagai fungsi murni terpisah dari komponen UI agar mudah diuji terisolasi
 - Nilai Title dan Content yang disimpan ke `Note_Context` adalah nilai yang sudah di-trim untuk konsistensi
+- Gaya visual menggunakan **Neobrutalism** dengan border hitam tebal, bayangan hitam tajam (_hard shadows_), warna kontras (kuning terang `#FFE600` dan aksen merah muda `#FF70A6`), serta tactile feedback pada interaksi tombol
 
 ## Task Dependency Graph
 

@@ -1,6 +1,29 @@
 .app {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 1rem;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        sans-serif;
+    max-width: 680px;
+    margin: 2.5rem auto;
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: #000000;
+    margin-top: 0;
+    margin-bottom: 1.75rem;
+    display: inline-block;
+    background-color: #ff70a6;
+    padding: 0.4rem 1rem;
+    border: 3px solid #000000;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0px #000000;
 }
