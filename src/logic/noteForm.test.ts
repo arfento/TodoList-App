@@ -13,7 +13,7 @@ describe("validateNoteForm", () => {
 
     expect(validationResult.isValid).toBe(true);
     expect(validationResult.errors).toEqual({ title: null, content: null });
-    expect(validationResult.values).toEqual({
+    expect(validationResult.normalizedValues).toEqual({
       title: "Judul",
       content: "Isi catatan",
     });

@@ -1,10 +1,10 @@
-.section {
+.noteListSection {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
 
-.header {
+.listHeader {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -12,7 +12,7 @@
     gap: 1rem;
 }
 
-.heading {
+.listHeading {
     margin: 0;
     font-size: 1.35rem;
     font-weight: 900;
@@ -21,14 +21,14 @@
     color: #000000;
 }
 
-.count {
+.noteCount {
     margin: 0.3rem 0 0;
     font-size: 0.9rem;
     font-weight: 700;
     color: #333333;
 }
 
-.addButton {
+.addNoteButton {
     padding: 0.7rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 800;
@@ -46,16 +46,16 @@
         background-color 0.15s ease;
 }
 
-.addButton:hover {
+.addNoteButton:hover {
     background-color: #ff5c99;
 }
 
-.addButton:active {
+.addNoteButton:active {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0px #000000;
 }
 
-.empty {
+.emptyState {
     margin: 0;
     padding: 1.5rem;
     font-weight: 700;
@@ -66,7 +66,7 @@
     box-shadow: 5px 5px 0px #000000;
 }
 
-.list {
+.noteList {
     display: grid;
     gap: 1rem;
     margin: 0;
@@ -74,7 +74,7 @@
     list-style: none;
 }
 
-.card {
+.noteCard {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -85,7 +85,7 @@
     box-shadow: 5px 5px 0px #000000;
 }
 
-.cardTitle {
+.noteTitle {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 900;
@@ -93,7 +93,7 @@
     overflow-wrap: anywhere;
 }
 
-.cardContent {
+.noteContent {
     margin: 0;
     color: #222222;
     line-height: 1.5;
@@ -101,7 +101,7 @@
     overflow-wrap: anywhere;
 }
 
-.cardFooter {
+.noteFooter {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -110,13 +110,13 @@
     margin-top: 0.35rem;
 }
 
-.date {
+.noteDate {
     font-size: 0.8rem;
     font-weight: 600;
     color: #555555;
 }
 
-.editButton {
+.editNoteButton {
     padding: 0.45rem 0.9rem;
     font-size: 0.85rem;
     font-weight: 800;
@@ -133,11 +133,11 @@
         background-color 0.15s ease;
 }
 
-.editButton:hover {
+.editNoteButton:hover {
     background-color: #ffde59;
 }
 
-.editButton:active {
+.editNoteButton:active {
     transform: translate(2px, 2px);
     box-shadow: 1px 1px 0px #000000;
 }

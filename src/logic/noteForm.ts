@@ -9,7 +9,7 @@ export interface NoteFormErrors {
 export interface NoteFormValidationResult {
   isValid: boolean;
   errors: NoteFormErrors;
-  values: NoteInput;
+  normalizedValues: NoteInput;
 }
 
 /**
@@ -31,7 +31,7 @@ export function validateNoteForm(
       title: titleResult.error ?? null,
       content: contentResult.error ?? null,
     },
-    values: {
+    normalizedValues: {
       title: title.trim(),
       content: content.trim(),
     },

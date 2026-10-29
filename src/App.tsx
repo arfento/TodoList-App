@@ -4,38 +4,42 @@ import { NoteForm } from "./components/NoteForm";
 import { NoteList } from "./components/NoteList";
 import styles from "./App.module.css";
 
-type View =
-  | { name: "list" }
-  | { name: "create" }
-  | { name: "edit"; noteId: string };
+type AppView =
+  | { kind: "noteList" }
+  | { kind: "createNote" }
+  | { kind: "editNote"; noteId: string };
 
 function AppContent() {
   const { notes } = useNotes();
-  const [currentView, setCurrentView] = useState<View>({ name: "list" });
+  const [currentView, setCurrentView] = useState<AppView>({
+    kind: "noteList",
+  });
 
-  const showNoteList = () => setCurrentView({ name: "list" });
+  const showNoteList = () => setCurrentView({ kind: "noteList" });
   const editingNote =
-    currentView.name === "edit"
+    currentView.kind === "editNote"
       ? notes.find((note) => note.id === currentView.noteId)
       : undefined;
 
   return (
-    <div className={styles.app}>
-      <h1 className={styles.title}>TodoList App</h1>
+    <div className={styles.appShell}>
+      <h1 className={styles.appTitle}>TodoList App</h1>
 
-      {currentView.name === "list" && (
+      {currentView.kind === "noteList" && (
         <NoteList
           notes={notes}
-          onAddNote={() => setCurrentView({ name: "create" })}
-          onEditNote={(noteId) => setCurrentView({ name: "edit", noteId })}
+          onAddNote={() => setCurrentView({ kind: "createNote" })}
+          onEditNote={(noteId) =>
+            setCurrentView({ kind: "editNote", noteId })
+          }
         />
       )}
 
-      {currentView.name === "create" && (
+      {currentView.kind === "createNote" && (
         <NoteForm onSaved={showNoteList} onCancel={showNoteList} />
       )}
 
-      {currentView.name === "edit" && editingNote && (
+      {currentView.kind === "editNote" && editingNote && (
         <NoteForm
           key={editingNote.id}
           noteId={editingNote.id}
@@ -46,12 +50,12 @@ function AppContent() {
         />
       )}
 
-      {currentView.name === "edit" && !editingNote && (
-        <div className={styles.notFound}>
+      {currentView.kind === "editNote" && !editingNote && (
+        <div className={styles.noteNotFound}>
           <p>Catatan tidak ditemukan.</p>
           <button
             type="button"
-            className={styles.backButton}
+            className={styles.backToListButton}
             onClick={showNoteList}
           >
             Kembali ke Daftar

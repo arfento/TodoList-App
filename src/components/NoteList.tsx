@@ -7,7 +7,7 @@ interface NoteListProps {
   onEditNote: (noteId: string) => void;
 }
 
-function formatDate(createdAt: string): string {
+function formatCreatedAt(createdAt: string): string {
   return new Date(createdAt).toLocaleString("id-ID", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -17,38 +17,45 @@ function formatDate(createdAt: string): string {
 /** Halaman daftar catatan dengan aksi tambah dan edit. */
 export function NoteList({ notes, onAddNote, onEditNote }: NoteListProps) {
   return (
-    <section className={styles.section} aria-labelledby="notes-heading">
-      <div className={styles.header}>
+    <section
+      className={styles.noteListSection}
+      aria-labelledby="notes-heading"
+    >
+      <div className={styles.listHeader}>
         <div>
-          <h2 id="notes-heading" className={styles.heading}>
+          <h2 id="notes-heading" className={styles.listHeading}>
             Daftar Catatan
           </h2>
-          <p className={styles.count}>
+          <p className={styles.noteCount}>
             {notes.length} catatan
           </p>
         </div>
-        <button type="button" className={styles.addButton} onClick={onAddNote}>
+        <button
+          type="button"
+          className={styles.addNoteButton}
+          onClick={onAddNote}
+        >
           Tambah Catatan
         </button>
       </div>
 
       {notes.length === 0 ? (
-        <p className={styles.empty}>
+        <p className={styles.emptyState}>
           Belum ada catatan. Tambahkan catatan pertama Anda.
         </p>
       ) : (
-        <ul className={styles.list}>
+        <ul className={styles.noteList}>
           {notes.map((note) => (
-            <li key={note.id} className={styles.card}>
-              <h3 className={styles.cardTitle}>{note.title}</h3>
-              <p className={styles.cardContent}>{note.content}</p>
-              <div className={styles.cardFooter}>
-                <time className={styles.date} dateTime={note.createdAt}>
-                  {formatDate(note.createdAt)}
+            <li key={note.id} className={styles.noteCard}>
+              <h3 className={styles.noteTitle}>{note.title}</h3>
+              <p className={styles.noteContent}>{note.content}</p>
+              <div className={styles.noteFooter}>
+                <time className={styles.noteDate} dateTime={note.createdAt}>
+                  {formatCreatedAt(note.createdAt)}
                 </time>
                 <button
                   type="button"
-                  className={styles.editButton}
+                  className={styles.editNoteButton}
                   onClick={() => onEditNote(note.id)}
                   aria-label={`Edit catatan ${note.title}`}
                 >

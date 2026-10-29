@@ -17,12 +17,12 @@ import styles from "./NoteForm.module.css";
 
 /** Component wrapper to observe context notes list */
 function NoteWatcher({
-  onNotes,
+  onNotesSnapshot,
 }: {
-  onNotes: (notes: ReturnType<typeof useNotes>["notes"]) => void;
+  onNotesSnapshot: (notes: ReturnType<typeof useNotes>["notes"]) => void;
 }) {
   const { notes } = useNotes();
-  onNotes(notes);
+  onNotesSnapshot(notes);
   return (
     <div>
       <span data-testid="notes-count">{notes.length}</span>
@@ -37,20 +37,20 @@ function NoteWatcher({
 }
 
 function renderNoteFormWithProvider() {
-  let currentNotes: ReturnType<typeof useNotes>["notes"] = [];
-  const utils = render(
+  let latestNotes: ReturnType<typeof useNotes>["notes"] = [];
+  const renderResult = render(
     <NoteProvider>
       <NoteForm />
       <NoteWatcher
-        onNotes={(notes) => {
-          currentNotes = notes;
+        onNotesSnapshot={(notes) => {
+          latestNotes = notes;
         }}
       />
     </NoteProvider>,
   );
   return {
-    ...utils,
-    getNotes: () => currentNotes,
+    ...renderResult,
+    getLatestNotes: () => latestNotes,
   };
 }
 
@@ -96,13 +96,13 @@ describe("NoteForm Component", () => {
       expect(contentError).toBeInTheDocument();
 
       // Verify styling uses error class with red color
-      expect(titleError).toHaveClass(styles.error);
-      expect(contentError).toHaveClass(styles.error);
+      expect(titleError).toHaveClass(styles.fieldError);
+      expect(contentError).toHaveClass(styles.fieldError);
     });
 
     it("shows error when title is too long and content is too long (Req 2.2, 3.2)", async () => {
       const user = userEvent.setup();
-      const { getNotes } = renderNoteFormWithProvider();
+      const { getLatestNotes } = renderNoteFormWithProvider();
 
       const titleInput = screen.getByLabelText(/title/i);
       const contentInput = screen.getByLabelText(/content/i);
@@ -114,7 +114,7 @@ describe("NoteForm Component", () => {
 
       expect(screen.getByText(ERROR_TITLE_TOO_LONG)).toBeInTheDocument();
       expect(screen.getByText(ERROR_CONTENT_TOO_LONG)).toBeInTheDocument();
-      expect(getNotes()).toHaveLength(0);
+      expect(getLatestNotes()).toHaveLength(0);
     });
 
     it("removes error immediately when field is edited to become valid (Req 2.3, 3.3)", async () => {
@@ -145,7 +145,7 @@ describe("NoteForm Component", () => {
 
     it("clears inputs and errors after successful save (Req 4.1, 4.2)", async () => {
       const user = userEvent.setup();
-      const { getNotes } = renderNoteFormWithProvider();
+      const { getLatestNotes } = renderNoteFormWithProvider();
 
       const titleInput = screen.getByLabelText(/title/i);
       const contentInput = screen.getByLabelText(/content/i);
@@ -166,7 +166,7 @@ describe("NoteForm Component", () => {
       ).not.toBeInTheDocument();
 
       // Context received trimmed note
-      const notes = getNotes();
+      const notes = getLatestNotes();
       expect(notes).toHaveLength(1);
       expect(notes[0].title).toBe("My Note");
       expect(notes[0].content).toBe("Valid content body");
@@ -220,7 +220,7 @@ describe("NoteForm Component", () => {
           validContentArb,
           async (title, content) => {
             cleanup();
-            const { getNotes } = renderNoteFormWithProvider();
+            const { getLatestNotes } = renderNoteFormWithProvider();
 
             const titleInput = screen.getByLabelText(/title/i);
             const contentInput = screen.getByLabelText(/content/i);
@@ -230,7 +230,7 @@ describe("NoteForm Component", () => {
             await user.type(contentInput, content);
             await user.click(saveButton);
 
-            const notes = getNotes();
+            const notes = getLatestNotes();
             expect(notes).toHaveLength(1);
             expect(notes[0].title).toBe(title.trim());
             expect(notes[0].content).toBe(content.trim());
@@ -308,7 +308,7 @@ describe("NoteForm Component", () => {
       fc.assert(
         fc.property(invalidPairArb, ([title, content]) => {
           cleanup();
-          const { getNotes } = renderNoteFormWithProvider();
+          const { getLatestNotes } = renderNoteFormWithProvider();
 
           const titleInput = screen.getByLabelText(
             /title/i,
@@ -323,7 +323,7 @@ describe("NoteForm Component", () => {
           fireEvent.click(saveButton);
 
           // Notes list length must NOT change
-          expect(getNotes()).toHaveLength(0);
+          expect(getLatestNotes()).toHaveLength(0);
 
           const isTitleValid =
             title.trim().length >= 1 && title.trim().length <= TITLE_MAX_LENGTH;

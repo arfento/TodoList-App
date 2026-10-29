@@ -15,12 +15,12 @@ describe('createId', () => {
   })
 
   it('returns unique values across many calls', () => {
-    const ids = new Set<string>()
+    const generatedIds = new Set<string>()
     const iterations = 1000
     for (let iteration = 0; iteration < iterations; iteration++) {
-      ids.add(createId())
+      generatedIds.add(createId())
     }
-    expect(ids.size).toBe(iterations)
+    expect(generatedIds.size).toBe(iterations)
   })
 
   describe('when crypto.randomUUID is available', () => {
@@ -65,12 +65,12 @@ describe('createId', () => {
         value: undefined,
       })
 
-      const ids = new Set<string>()
+      const generatedIds = new Set<string>()
       const iterations = 1000
       for (let iteration = 0; iteration < iterations; iteration++) {
-        ids.add(createId())
+        generatedIds.add(createId())
       }
-      expect(ids.size).toBe(iterations)
+      expect(generatedIds.size).toBe(iterations)
     })
   })
 })

@@ -23,86 +23,88 @@ describe("NoteContext", () => {
   });
 
   it("provides empty notes array initially", () => {
-    const { result } = useNotesWithProvider();
+    const { result: hookResult } = useNotesWithProvider();
 
-    expect(result.current.notes).toEqual([]);
+    expect(hookResult.current.notes).toEqual([]);
   });
 
   it("creates a note with a generated id and ISO createdAt timestamp", () => {
-    const { result } = useNotesWithProvider();
-    let created: Note | undefined;
+    const { result: hookResult } = useNotesWithProvider();
+    let createdNote: Note | undefined;
 
     act(() => {
-      created = result.current.addNote({
+      createdNote = hookResult.current.addNote({
         title: "Test Note Title",
         content: "Test Note Content",
       });
     });
 
-    expect(created).toMatchObject({
+    expect(createdNote).toMatchObject({
       title: "Test Note Title",
       content: "Test Note Content",
     });
-    expect(created?.id).toBeTruthy();
-    expect(created?.createdAt).toBe(new Date(created!.createdAt).toISOString());
-    expect(result.current.notes).toEqual([created]);
+    expect(createdNote?.id).toBeTruthy();
+    expect(createdNote?.createdAt).toBe(
+      new Date(createdNote!.createdAt).toISOString(),
+    );
+    expect(hookResult.current.notes).toEqual([createdNote]);
   });
 
   it("appends new notes in order", () => {
-    const { result } = useNotesWithProvider();
+    const { result: hookResult } = useNotesWithProvider();
 
     act(() => {
-      result.current.addNote({ title: "First", content: "First content" });
-      result.current.addNote({ title: "Second", content: "Second content" });
+      hookResult.current.addNote({ title: "First", content: "First content" });
+      hookResult.current.addNote({ title: "Second", content: "Second content" });
     });
 
-    expect(result.current.notes).toHaveLength(2);
-    expect(result.current.notes[0].title).toBe("First");
-    expect(result.current.notes[1].title).toBe("Second");
+    expect(hookResult.current.notes).toHaveLength(2);
+    expect(hookResult.current.notes[0].title).toBe("First");
+    expect(hookResult.current.notes[1].title).toBe("Second");
   });
 
   it("updates a note in place while preserving its id and createdAt", () => {
-    const { result } = useNotesWithProvider();
-    let created: Note | undefined;
+    const { result: hookResult } = useNotesWithProvider();
+    let createdNote: Note | undefined;
 
     act(() => {
-      created = result.current.addNote({
+      createdNote = hookResult.current.addNote({
         title: "Original title",
         content: "Original content",
       });
     });
 
     act(() => {
-      result.current.updateNote(created!.id, {
+      hookResult.current.updateNote(createdNote!.id, {
         title: "Updated title",
         content: "Updated content",
       });
     });
 
-    expect(result.current.notes).toHaveLength(1);
-    expect(result.current.notes[0]).toEqual({
-      id: created!.id,
+    expect(hookResult.current.notes).toHaveLength(1);
+    expect(hookResult.current.notes[0]).toEqual({
+      id: createdNote!.id,
       title: "Updated title",
       content: "Updated content",
-      createdAt: created!.createdAt,
+      createdAt: createdNote!.createdAt,
     });
   });
 
   it("ignores updates for an unknown note id", () => {
-    const { result } = useNotesWithProvider();
+    const { result: hookResult } = useNotesWithProvider();
 
     act(() => {
-      result.current.addNote({ title: "Keep", content: "Keep content" });
+      hookResult.current.addNote({ title: "Keep", content: "Keep content" });
     });
 
     act(() => {
-      result.current.updateNote("missing-id", {
+      hookResult.current.updateNote("missing-id", {
         title: "Changed",
         content: "Changed content",
       });
     });
 
-    expect(result.current.notes).toHaveLength(1);
-    expect(result.current.notes[0].title).toBe("Keep");
+    expect(hookResult.current.notes).toHaveLength(1);
+    expect(hookResult.current.notes[0].title).toBe("Keep");
   });
 });

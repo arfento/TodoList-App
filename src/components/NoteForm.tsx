@@ -48,7 +48,9 @@ export function NoteForm({
   const isEditing = noteId !== undefined;
 
   /** Salin hasil validasi ke state error masing-masing field. */
-  const applyValidationResult = (validationResult: NoteFormValidationResult) => {
+  const applyValidationResult = (
+    validationResult: NoteFormValidationResult,
+  ) => {
     setTitleError(validationResult.errors.title);
     setContentError(validationResult.errors.content);
   };
@@ -99,17 +101,17 @@ export function NoteForm({
       return;
     }
 
-    persistNote(validationResult.values);
+    persistNote(validationResult.normalizedValues);
     resetForm();
     onSaved?.();
   };
 
   return (
-    <form onSubmit={handleSave} className={styles.form} noValidate>
-      <h2 className={styles.formTitle}>
+    <form onSubmit={handleSave} className={styles.noteForm} noValidate>
+      <h2 className={styles.formHeading}>
         {isEditing ? "Edit Catatan" : "Catatan Baru"}
       </h2>
-      <div className={styles.field}>
+      <div className={styles.formField}>
         <label htmlFor="title">Title</label>
         <input
           id="title"
@@ -117,23 +119,27 @@ export function NoteForm({
           value={titleValue}
           onChange={handleTitleChange}
         />
-        {titleError && <p className={styles.error}>{titleError}</p>}
+        {titleError && <p className={styles.fieldError}>{titleError}</p>}
       </div>
-      <div className={styles.field}>
+      <div className={styles.formField}>
         <label htmlFor="content">Content</label>
         <textarea
           id="content"
           value={contentValue}
           onChange={handleContentChange}
         />
-        {contentError && <p className={styles.error}>{contentError}</p>}
+        {contentError && <p className={styles.fieldError}>{contentError}</p>}
       </div>
-      <div className={styles.actions}>
-        <button type="submit" className={styles.submit}>
+      <div className={styles.formActions}>
+        <button type="submit" className={styles.saveButton}>
           Save
         </button>
         {onCancel && (
-          <button type="button" className={styles.cancel} onClick={onCancel}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            onClick={onCancel}
+          >
             Batal
           </button>
         )}

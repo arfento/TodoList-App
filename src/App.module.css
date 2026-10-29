@@ -1,4 +1,4 @@
-.app {
+.appShell {
     font-family:
         system-ui,
         -apple-system,
@@ -12,7 +12,7 @@
     box-sizing: border-box;
 }
 
-.title {
+.appTitle {
     font-size: 2rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -28,7 +28,7 @@
     box-shadow: 4px 4px 0px #000000;
 }
 
-.notFound {
+.noteNotFound {
     padding: 1.5rem;
     background-color: #ffffff;
     border: 3px solid #000000;
@@ -36,7 +36,7 @@
     box-shadow: 5px 5px 0px #000000;
 }
 
-.backButton {
+.backToListButton {
     padding: 0.6rem 1.1rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -48,7 +48,7 @@
     box-shadow: 3px 3px 0px #000000;
 }
 
-.backButton:active {
+.backToListButton:active {
     transform: translate(2px, 2px);
     box-shadow: 1px 1px 0px #000000;
 }
