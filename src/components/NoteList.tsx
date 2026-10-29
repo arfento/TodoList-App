@@ -3,19 +3,19 @@ import styles from "./NoteList.module.css";
 
 interface NoteListProps {
   notes: Note[];
-  onAdd: () => void;
-  onEdit: (id: string) => void;
+  onAddNote: () => void;
+  onEditNote: (noteId: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleString("id-ID", {
+function formatDate(createdAt: string): string {
+  return new Date(createdAt).toLocaleString("id-ID", {
     dateStyle: "medium",
     timeStyle: "short",
   });
 }
 
 /** Halaman daftar catatan dengan aksi tambah dan edit. */
-export function NoteList({ notes, onAdd, onEdit }: NoteListProps) {
+export function NoteList({ notes, onAddNote, onEditNote }: NoteListProps) {
   return (
     <section className={styles.section} aria-labelledby="notes-heading">
       <div className={styles.header}>
@@ -27,7 +27,7 @@ export function NoteList({ notes, onAdd, onEdit }: NoteListProps) {
             {notes.length} catatan
           </p>
         </div>
-        <button type="button" className={styles.addButton} onClick={onAdd}>
+        <button type="button" className={styles.addButton} onClick={onAddNote}>
           Tambah Catatan
         </button>
       </div>
@@ -49,7 +49,7 @@ export function NoteList({ notes, onAdd, onEdit }: NoteListProps) {
                 <button
                   type="button"
                   className={styles.editButton}
-                  onClick={() => onEdit(note.id)}
+                  onClick={() => onEditNote(note.id)}
                   aria-label={`Edit catatan ${note.title}`}
                 >
                   Edit

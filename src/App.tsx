@@ -11,48 +11,48 @@ type View =
 
 function AppContent() {
   const { notes } = useNotes();
-  const [view, setView] = useState<View>({ name: "list" });
+  const [currentView, setCurrentView] = useState<View>({ name: "list" });
 
-  const goToList = () => setView({ name: "list" });
+  const showNoteList = () => setCurrentView({ name: "list" });
   const editingNote =
-    view.name === "edit"
-      ? notes.find((note) => note.id === view.noteId)
+    currentView.name === "edit"
+      ? notes.find((note) => note.id === currentView.noteId)
       : undefined;
 
   return (
     <div className={styles.app}>
       <h1 className={styles.title}>TodoList App</h1>
 
-      {view.name === "list" && (
+      {currentView.name === "list" && (
         <NoteList
           notes={notes}
-          onAdd={() => setView({ name: "create" })}
-          onEdit={(noteId) => setView({ name: "edit", noteId })}
+          onAddNote={() => setCurrentView({ name: "create" })}
+          onEditNote={(noteId) => setCurrentView({ name: "edit", noteId })}
         />
       )}
 
-      {view.name === "create" && (
-        <NoteForm onSaved={goToList} onCancel={goToList} />
+      {currentView.name === "create" && (
+        <NoteForm onSaved={showNoteList} onCancel={showNoteList} />
       )}
 
-      {view.name === "edit" && editingNote && (
+      {currentView.name === "edit" && editingNote && (
         <NoteForm
           key={editingNote.id}
           noteId={editingNote.id}
           initialTitle={editingNote.title}
           initialContent={editingNote.content}
-          onSaved={goToList}
-          onCancel={goToList}
+          onSaved={showNoteList}
+          onCancel={showNoteList}
         />
       )}
 
-      {view.name === "edit" && !editingNote && (
+      {currentView.name === "edit" && !editingNote && (
         <div className={styles.notFound}>
           <p>Catatan tidak ditemukan.</p>
           <button
             type="button"
             className={styles.backButton}
-            onClick={goToList}
+            onClick={showNoteList}
           >
             Kembali ke Daftar
           </button>

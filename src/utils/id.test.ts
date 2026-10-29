@@ -17,7 +17,7 @@ describe('createId', () => {
   it('returns unique values across many calls', () => {
     const ids = new Set<string>()
     const iterations = 1000
-    for (let i = 0; i < iterations; i++) {
+    for (let iteration = 0; iteration < iterations; iteration++) {
       ids.add(createId())
     }
     expect(ids.size).toBe(iterations)
@@ -67,7 +67,7 @@ describe('createId', () => {
 
       const ids = new Set<string>()
       const iterations = 1000
-      for (let i = 0; i < iterations; i++) {
+      for (let iteration = 0; iteration < iterations; iteration++) {
         ids.add(createId())
       }
       expect(ids.size).toBe(iterations)

@@ -11,9 +11,9 @@ export interface NoteContextValue {
    * Provider membuat `id` dan `createdAt`; pemanggil hanya menyediakan isi.
    * Mengembalikan Note yang baru dibuat.
    */
-  addNote: (input: NoteInput) => Note
+  addNote: (noteInput: NoteInput) => Note
   /** Mengubah title dan content Note yang sudah ada tanpa mengubah id/createdAt. */
-  updateNote: (id: string, input: NoteInput) => void
+  updateNote: (noteId: string, noteInput: NoteInput) => void
 }
 
 /**
@@ -30,27 +30,27 @@ export const NoteContext = createContext<NoteContextValue | undefined>(undefined
 export function NoteProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>([])
 
-  const addNote = (input: NoteInput): Note => {
-    const note: Note = {
+  const addNote = (noteInput: NoteInput): Note => {
+    const newNote: Note = {
       id: createId(),
-      title: input.title.trim(),
-      content: input.content.trim(),
+      title: noteInput.title.trim(),
+      content: noteInput.content.trim(),
       createdAt: new Date().toISOString(),
     }
-    setNotes((prev) => [...prev, note])
-    return note
+    setNotes((previousNotes) => [...previousNotes, newNote])
+    return newNote
   }
 
-  const updateNote = (id: string, input: NoteInput) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === id
+  const updateNote = (noteId: string, noteInput: NoteInput) => {
+    setNotes((previousNotes) =>
+      previousNotes.map((existingNote) =>
+        existingNote.id === noteId
           ? {
-              ...note,
-              title: input.title.trim(),
-              content: input.content.trim(),
+              ...existingNote,
+              title: noteInput.title.trim(),
+              content: noteInput.content.trim(),
             }
-          : note,
+          : existingNote,
       ),
     )
   }

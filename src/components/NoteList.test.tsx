@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { NoteList } from "./NoteList";
 import type { Note } from "../types/note";
 
-const notes: Note[] = [
+const sampleNotes: Note[] = [
   {
     id: "note-1",
     title: "Belanja mingguan",
@@ -21,14 +21,22 @@ const notes: Note[] = [
 
 describe("NoteList", () => {
   it("shows an empty state when there are no notes", () => {
-    render(<NoteList notes={[]} onAdd={vi.fn()} onEdit={vi.fn()} />);
+    render(
+      <NoteList notes={[]} onAddNote={vi.fn()} onEditNote={vi.fn()} />,
+    );
 
     expect(screen.getByText(/belum ada catatan/i)).toBeInTheDocument();
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
 
   it("renders every note title and content", () => {
-    render(<NoteList notes={notes} onAdd={vi.fn()} onEdit={vi.fn()} />);
+    render(
+      <NoteList
+        notes={sampleNotes}
+        onAddNote={vi.fn()}
+        onEditNote={vi.fn()}
+      />,
+    );
 
     expect(screen.getByText("Belanja mingguan")).toBeInTheDocument();
     expect(screen.getByText("Beli sayur dan buah")).toBeInTheDocument();
@@ -37,25 +45,37 @@ describe("NoteList", () => {
     expect(screen.getByText(/2 catatan/i)).toBeInTheDocument();
   });
 
-  it("calls onAdd when the add button is clicked", async () => {
+  it("calls onAddNote when the add button is clicked", async () => {
     const user = userEvent.setup();
-    const onAdd = vi.fn();
-    render(<NoteList notes={notes} onAdd={onAdd} onEdit={vi.fn()} />);
+    const onAddNote = vi.fn();
+    render(
+      <NoteList
+        notes={sampleNotes}
+        onAddNote={onAddNote}
+        onEditNote={vi.fn()}
+      />,
+    );
 
     await user.click(screen.getByRole("button", { name: /tambah catatan/i }));
 
-    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onAddNote).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onEdit with the selected note id", async () => {
+  it("calls onEditNote with the selected note id", async () => {
     const user = userEvent.setup();
-    const onEdit = vi.fn();
-    render(<NoteList notes={notes} onAdd={vi.fn()} onEdit={onEdit} />);
+    const onEditNote = vi.fn();
+    render(
+      <NoteList
+        notes={sampleNotes}
+        onAddNote={vi.fn()}
+        onEditNote={onEditNote}
+      />,
+    );
 
     await user.click(
       screen.getByRole("button", { name: /edit catatan belanja mingguan/i }),
     );
 
-    expect(onEdit).toHaveBeenCalledWith("note-1");
+    expect(onEditNote).toHaveBeenCalledWith("note-1");
   });
 });

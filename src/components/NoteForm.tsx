@@ -1,6 +1,11 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNotes } from "../context/NoteContext";
 import { validateTitle, validateContent } from "../logic/validation";
+import {
+  validateNoteForm,
+  type NoteFormValidationResult,
+} from "../logic/noteForm";
+import type { NoteInput } from "../types/note";
 import styles from "./NoteForm.module.css";
 
 interface NoteFormProps {
@@ -42,63 +47,61 @@ export function NoteForm({
 
   const isEditing = noteId !== undefined;
 
+  /** Salin hasil validasi ke state error masing-masing field. */
+  const applyValidationResult = (validationResult: NoteFormValidationResult) => {
+    setTitleError(validationResult.errors.title);
+    setContentError(validationResult.errors.content);
+  };
+
+  /** Simpan nilai yang sudah tervalidasi ke Context (buat atau ubah). */
+  const persistNote = (noteInput: NoteInput) => {
+    if (isEditing) {
+      updateNote(noteId, noteInput);
+    } else {
+      addNote(noteInput);
+    }
+  };
+
+  /** Kosongkan nilai dan seluruh pesan error formulir. */
+  const resetForm = () => {
+    setTitleValue("");
+    setContentValue("");
+    setTitleError(null);
+    setContentError(null);
+  };
+
   /** Perbarui Title dan hapus error bila nilai baru menjadi valid. */
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setTitleValue(value);
-    if (titleError && validateTitle(value).valid) {
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextTitle = event.target.value;
+    setTitleValue(nextTitle);
+    if (titleError && validateTitle(nextTitle).valid) {
       setTitleError(null);
     }
   };
 
   /** Perbarui Content dan hapus error bila nilai baru menjadi valid. */
-  const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setContentValue(value);
-    if (contentError && validateContent(value).valid) {
+  const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const nextContent = event.target.value;
+    setContentValue(nextContent);
+    if (contentError && validateContent(nextContent).valid) {
       setContentError(null);
     }
   };
 
-  /** Validasi kedua field saat Save diklik; simpan catatan bila keduanya valid. */
-  const handleSave = (e: FormEvent) => {
-    e.preventDefault();
+  /** Orkestrasi submit: validasi, tampilkan error, simpan, lalu reset. */
+  const handleSave = (event: FormEvent) => {
+    event.preventDefault();
 
-    const titleResult = validateTitle(titleValue);
-    const contentResult = validateContent(contentValue);
+    const validationResult = validateNoteForm(titleValue, contentValue);
+    applyValidationResult(validationResult);
 
-    if (!titleResult.valid) {
-      setTitleError(titleResult.error!);
-    } else {
-      setTitleError(null);
+    if (!validationResult.isValid) {
+      return;
     }
 
-    if (!contentResult.valid) {
-      setContentError(contentResult.error!);
-    } else {
-      setContentError(null);
-    }
-
-    // Hanya simpan bila kedua validasi lulus.
-    if (titleResult.valid && contentResult.valid) {
-      const input = {
-        title: titleValue.trim(),
-        content: contentValue.trim(),
-      };
-
-      if (isEditing) {
-        updateNote(noteId, input);
-      } else {
-        addNote(input);
-      }
-
-      // Reset seluruh state form.
-      setTitleValue("");
-      setContentValue("");
-      setTitleError(null);
-      setContentError(null);
-      onSaved?.();
-    }
+    persistNote(validationResult.values);
+    resetForm();
+    onSaved?.();
   };
 
   return (

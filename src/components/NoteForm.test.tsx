@@ -26,10 +26,10 @@ function NoteWatcher({
   return (
     <div>
       <span data-testid="notes-count">{notes.length}</span>
-      {notes.map((n) => (
-        <div key={n.id} data-testid="note-entry">
-          <span data-testid="note-entry-title">{n.title}</span>
-          <span data-testid="note-entry-content">{n.content}</span>
+      {notes.map((note) => (
+        <div key={note.id} data-testid="note-entry">
+          <span data-testid="note-entry-title">{note.title}</span>
+          <span data-testid="note-entry-content">{note.content}</span>
         </div>
       ))}
     </div>
@@ -182,13 +182,13 @@ describe("NoteForm Component", () => {
     );
     const validTitleCoreArb = fc
       .array(validCharArb, { minLength: 1, maxLength: TITLE_MAX_LENGTH })
-      .map((c) => c.join(""));
+      .map((characters) => characters.join(""));
     const validContentCoreArb = fc
       .array(validCharArb, {
         minLength: CONTENT_MIN_LENGTH,
         maxLength: CONTENT_MAX_LENGTH,
       })
-      .map((c) => c.join(""));
+      .map((characters) => characters.join(""));
 
     const paddingArb = fc.constantFrom("", " ", "  ", "\t");
 
@@ -196,16 +196,18 @@ describe("NoteForm Component", () => {
       .tuple(paddingArb, validTitleCoreArb, paddingArb)
       .map(([pre, mid, post]) => `${pre}${mid}${post}`)
       .filter(
-        (s) => s.trim().length >= 1 && s.trim().length <= TITLE_MAX_LENGTH,
+        (candidateText) =>
+          candidateText.trim().length >= 1 &&
+          candidateText.trim().length <= TITLE_MAX_LENGTH,
       );
 
     const validContentArb = fc
       .tuple(paddingArb, validContentCoreArb, paddingArb)
       .map(([pre, mid, post]) => `${pre}${mid}${post}`)
       .filter(
-        (s) =>
-          s.trim().length >= CONTENT_MIN_LENGTH &&
-          s.trim().length <= CONTENT_MAX_LENGTH,
+        (candidateText) =>
+          candidateText.trim().length >= CONTENT_MIN_LENGTH &&
+          candidateText.trim().length <= CONTENT_MAX_LENGTH,
       );
 
     // Feature: add-new-note, Property 3: Valid save adds note with correct data
@@ -279,7 +281,7 @@ describe("NoteForm Component", () => {
         fc.stringMatching(/^[ \t\n\r]+$/),
         fc
           .string({ minLength: 51, maxLength: 80 })
-          .filter((s) => s.trim().length > TITLE_MAX_LENGTH),
+          .filter((candidateTitle) => candidateTitle.trim().length > TITLE_MAX_LENGTH),
       );
       // Invalid content: empty/whitespace, strictly < 3 characters, or strictly > 50 characters when trimmed
       const invalidContentArb = fc.oneof(
@@ -287,10 +289,13 @@ describe("NoteForm Component", () => {
         fc.stringMatching(/^[ \t\n\r]*$/),
         fc
           .array(validCharArb, { minLength: 1, maxLength: 2 })
-          .map((c) => c.join("")),
+          .map((characters) => characters.join("")),
         fc
           .string({ minLength: 51, maxLength: 80 })
-          .filter((s) => s.trim().length > CONTENT_MAX_LENGTH),
+          .filter(
+            (candidateContent) =>
+              candidateContent.trim().length > CONTENT_MAX_LENGTH,
+          ),
       );
 
       // Pair where AT LEAST one is guaranteed invalid
