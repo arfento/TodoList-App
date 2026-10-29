@@ -1,12 +1,23 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNotes } from "../context/NoteContext";
-import { createId } from "../utils/id";
 import { validateTitle, validateContent } from "../logic/validation";
-import type { Note } from "../types/note";
 import styles from "./NoteForm.module.css";
 
+interface NoteFormProps {
+  /** Nilai awal Title; dipakai saat mengedit catatan. */
+  initialTitle?: string;
+  /** Nilai awal Content; dipakai saat mengedit catatan. */
+  initialContent?: string;
+  /** Bila diisi, formulir mengubah catatan ini alih-alih membuat catatan baru. */
+  noteId?: string;
+  /** Dipanggil setelah penyimpanan berhasil. */
+  onSaved?: () => void;
+  /** Dipanggil saat pengguna membatalkan pengisian formulir. */
+  onCancel?: () => void;
+}
+
 /**
- * Formulir untuk menambahkan catatan baru.
+ * Formulir untuk menambahkan atau mengubah catatan.
  *
  * Mengelola state form lokal (Title, Content, dan pesan error masing-masing)
  * sebagai controlled components via `useState`. Validasi dijalankan saat
@@ -16,12 +27,20 @@ import styles from "./NoteForm.module.css";
  * Umpan balik langsung (Req 2.3 & 3.3): saat sebuah field berubah dan nilainya
  * menjadi valid, pesan error untuk field tersebut dihapus.
  */
-export function NoteForm() {
-  const { addNote } = useNotes();
-  const [titleValue, setTitleValue] = useState("");
-  const [contentValue, setContentValue] = useState("");
+export function NoteForm({
+  initialTitle = "",
+  initialContent = "",
+  noteId,
+  onSaved,
+  onCancel,
+}: NoteFormProps) {
+  const { addNote, updateNote } = useNotes();
+  const [titleValue, setTitleValue] = useState(initialTitle);
+  const [contentValue, setContentValue] = useState(initialContent);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
+
+  const isEditing = noteId !== undefined;
 
   /** Perbarui Title dan hapus error bila nilai baru menjadi valid. */
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -62,24 +81,31 @@ export function NoteForm() {
 
     // Hanya simpan bila kedua validasi lulus.
     if (titleResult.valid && contentResult.valid) {
-      const note: Note = {
-        id: createId(),
+      const input = {
         title: titleValue.trim(),
         content: contentValue.trim(),
-        createdAt: new Date().toISOString(),
       };
-      addNote(note);
+
+      if (isEditing) {
+        updateNote(noteId, input);
+      } else {
+        addNote(input);
+      }
 
       // Reset seluruh state form.
       setTitleValue("");
       setContentValue("");
       setTitleError(null);
       setContentError(null);
+      onSaved?.();
     }
   };
 
   return (
-    <form onSubmit={handleSave} className={styles.form}>
+    <form onSubmit={handleSave} className={styles.form} noValidate>
+      <h2 className={styles.formTitle}>
+        {isEditing ? "Edit Catatan" : "Catatan Baru"}
+      </h2>
       <div className={styles.field}>
         <label htmlFor="title">Title</label>
         <input
@@ -99,7 +125,16 @@ export function NoteForm() {
         />
         {contentError && <p className={styles.error}>{contentError}</p>}
       </div>
-      <button type="submit">Save</button>
+      <div className={styles.actions}>
+        <button type="submit" className={styles.submit}>
+          Save
+        </button>
+        {onCancel && (
+          <button type="button" className={styles.cancel} onClick={onCancel}>
+            Batal
+          </button>
+        )}
+      </div>
     </form>
   );
 }

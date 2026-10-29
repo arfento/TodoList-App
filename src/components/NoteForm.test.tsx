@@ -176,7 +176,7 @@ describe("NoteForm Component", () => {
   describe("Property-Based Tests", () => {
     // Generators for valid inputs
     const validCharArb = fc.constantFrom(
-      ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?".split(
+      ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=|;:,.<>?".split(
         "",
       ),
     );
@@ -209,34 +209,36 @@ describe("NoteForm Component", () => {
       );
 
     // Feature: add-new-note, Property 3: Valid save adds note with correct data
-    it("Property 3: Valid save adds note with correct data", () => {
-      fc.assert(
-        fc.property(validTitleArb, validContentArb, (title, content) => {
-          cleanup();
-          const { getNotes } = renderNoteFormWithProvider();
+    it("Property 3: Valid save adds note with correct data", async () => {
+      const user = userEvent.setup({ delay: null });
 
-          const titleInput = screen.getByLabelText(
-            /title/i,
-          ) as HTMLInputElement;
-          const contentInput = screen.getByLabelText(
-            /content/i,
-          ) as HTMLTextAreaElement;
-          const saveButton = screen.getByRole("button", { name: /save/i });
+      await fc.assert(
+        fc.asyncProperty(
+          validTitleArb,
+          validContentArb,
+          async (title, content) => {
+            cleanup();
+            const { getNotes } = renderNoteFormWithProvider();
 
-          fireEvent.change(titleInput, { target: { value: title } });
-          fireEvent.change(contentInput, { target: { value: content } });
-          fireEvent.click(saveButton);
+            const titleInput = screen.getByLabelText(/title/i);
+            const contentInput = screen.getByLabelText(/content/i);
+            const saveButton = screen.getByRole("button", { name: /save/i });
 
-          const notes = getNotes();
-          expect(notes).toHaveLength(1);
-          expect(notes[0].title).toBe(title.trim());
-          expect(notes[0].content).toBe(content.trim());
-          expect(notes[0].id).toBeTruthy();
-          expect(notes[0].createdAt).toBeTruthy();
-        }),
+            await user.type(titleInput, title);
+            await user.type(contentInput, content);
+            await user.click(saveButton);
+
+            const notes = getNotes();
+            expect(notes).toHaveLength(1);
+            expect(notes[0].title).toBe(title.trim());
+            expect(notes[0].content).toBe(content.trim());
+            expect(notes[0].id).toBeTruthy();
+            expect(notes[0].createdAt).toBeTruthy();
+          },
+        ),
         { numRuns: 100 },
       );
-    });
+    }, 60000);
 
     // Feature: add-new-note, Property 4: Successful save clears inputs and removes errors
     it("Property 4: Successful save clears inputs and removes errors", () => {

@@ -9,3 +9,9 @@ export interface Note {
   /** Timestamp ISO 8601, dari new Date().toISOString(). */
   createdAt: string
 }
+
+/** Nilai yang dapat diisi pengguna saat membuat atau mengubah catatan. */
+export interface NoteInput {
+  title: string
+  content: string
+}

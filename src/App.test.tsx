@@ -2,129 +2,139 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-import { NoteProvider, useNotes } from "./context/NoteContext";
-import { NoteForm } from "./components/NoteForm";
 import {
   ERROR_TITLE_EMPTY,
   ERROR_TITLE_TOO_LONG,
   ERROR_CONTENT_TOO_SHORT,
 } from "./logic/validation";
 
-/** Helper component to display notes stored in Context for integration verification */
-function NoteListDisplay() {
-  const { notes } = useNotes();
-  return (
-    <div data-testid="notes-list-section">
-      <h2>Daftar Catatan ({notes.length})</h2>
-      <ul>
-        {notes.map((note) => (
-          <li key={note.id} data-testid="note-card">
-            <h3 data-testid="note-card-title">{note.title}</h3>
-            <p data-testid="note-card-content">{note.content}</p>
-            <time data-testid="note-card-date">{note.createdAt}</time>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+async function createNote(
+  user: ReturnType<typeof userEvent.setup>,
+  title: string,
+  content: string,
+) {
+  await user.click(screen.getByRole("button", { name: /tambah catatan/i }));
+  await user.type(screen.getByLabelText(/title/i), title);
+  await user.type(screen.getByLabelText(/content/i), content);
+  await user.click(screen.getByRole("button", { name: /save/i }));
 }
 
-describe("End-to-End Integration Flow", () => {
-  it("renders App with header and NoteForm correctly", () => {
+describe("App integration flows", () => {
+  it("starts on the notes list page", () => {
     render(<App />);
 
     expect(
       screen.getByRole("heading", { level: 1, name: /todolist app/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+    expect(screen.getByText(/belum ada catatan/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /tambah catatan/i }),
+    ).toBeInTheDocument();
   });
 
-  it("successful flow: fills valid Title and Content, clicks Save -> note is added to Context and inputs are cleared (Req 4.1, 4.2)", async () => {
+  it("adds a note and navigates back to the list showing the new note (Req 4.1, 4.2)", async () => {
     const user = userEvent.setup();
-    render(
-      <NoteProvider>
-        <NoteForm />
-        <NoteListDisplay />
-      </NoteProvider>,
-    );
+    render(<App />);
 
-    const titleInput = screen.getByLabelText(/title/i);
-    const contentInput = screen.getByLabelText(/content/i);
-    const saveButton = screen.getByRole("button", { name: /save/i });
-
-    // Fill valid data (title <= 50 chars, content between 3 and 50 chars)
-    await user.type(titleInput, "Belajar React & Vitest");
-    await user.type(contentInput, "Belajar testing dan clean architecture");
-
-    // Submit form
-    await user.click(saveButton);
-
-    // Verify inputs are cleared
-    expect(titleInput).toHaveValue("");
-    expect(contentInput).toHaveValue("");
-
-    // Verify note is stored and rendered in Context
-    expect(screen.getByText("Daftar Catatan (1)")).toBeInTheDocument();
-    expect(screen.getByTestId("note-card-title")).toHaveTextContent(
+    await createNote(
+      user,
       "Belajar React & Vitest",
-    );
-    expect(screen.getByTestId("note-card-content")).toHaveTextContent(
       "Belajar testing dan clean architecture",
     );
-    expect(screen.getByTestId("note-card-date")).not.toBeEmptyDOMElement();
+
+    // Back on the list page, with the saved note visible immediately.
+    expect(screen.getByText("Belajar React & Vitest")).toBeInTheDocument();
+    expect(
+      screen.getByText("Belajar testing dan clean architecture"),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/1 catatan/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/title/i)).not.toBeInTheDocument();
   });
 
-  it("failed flow: invalid input shows error and prevents adding note to Context (Req 5.1, 5.2)", async () => {
+  it("edits a note and shows the updated values on the list page", async () => {
     const user = userEvent.setup();
-    render(
-      <NoteProvider>
-        <NoteForm />
-        <NoteListDisplay />
-      </NoteProvider>,
-    );
+    render(<App />);
+    await createNote(user, "Judul lama", "Isi lama yang valid");
 
-    const contentInput = screen.getByLabelText(/content/i);
-    const saveButton = screen.getByRole("button", { name: /save/i });
-
-    // Only fill content, leave title empty
-    await user.type(contentInput, "Valid content length here");
-    await user.click(saveButton);
-
-    // Title error appears, content error does not
-    expect(screen.getByText(ERROR_TITLE_EMPTY)).toBeInTheDocument();
-    expect(screen.queryByText(ERROR_CONTENT_TOO_SHORT)).not.toBeInTheDocument();
-
-    // No note added to Context
-    expect(screen.getByText("Daftar Catatan (0)")).toBeInTheDocument();
-    expect(screen.queryByTestId("note-card")).not.toBeInTheDocument();
-  });
-
-  it("both fields fail simultaneously: displays errors on both fields and does not save note (Req 5.1, 5.2)", async () => {
-    const user = userEvent.setup();
-    render(
-      <NoteProvider>
-        <NoteForm />
-        <NoteListDisplay />
-      </NoteProvider>,
+    await user.click(
+      screen.getByRole("button", { name: /edit catatan judul lama/i }),
     );
 
     const titleInput = screen.getByLabelText(/title/i);
     const contentInput = screen.getByLabelText(/content/i);
-    const saveButton = screen.getByRole("button", { name: /save/i });
+    expect(titleInput).toHaveValue("Judul lama");
+    expect(contentInput).toHaveValue("Isi lama yang valid");
 
-    // Type title that is too long and content that is too short
-    await user.type(titleInput, "a".repeat(51));
-    await user.type(contentInput, "ab");
-    await user.click(saveButton);
+    await user.clear(titleInput);
+    await user.type(titleInput, "Judul baru");
+    await user.clear(contentInput);
+    await user.type(contentInput, "Isi baru yang valid");
+    await user.click(screen.getByRole("button", { name: /save/i }));
 
-    // Both errors shown
+    expect(screen.getByText("Judul baru")).toBeInTheDocument();
+    expect(screen.getByText("Isi baru yang valid")).toBeInTheDocument();
+    expect(screen.queryByText("Judul lama")).not.toBeInTheDocument();
+    expect(screen.queryByText("Isi lama yang valid")).not.toBeInTheDocument();
+    expect(screen.getByText(/1 catatan/i)).toBeInTheDocument();
+  });
+
+  it("keeps the form open and shows errors when the note is invalid (Req 5.1, 5.2)", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: /tambah catatan/i }));
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(screen.getByText(ERROR_TITLE_EMPTY)).toBeInTheDocument();
+    expect(screen.getByText(ERROR_CONTENT_TOO_SHORT)).toBeInTheDocument();
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
+    expect(screen.queryByText(/belum ada catatan/i)).not.toBeInTheDocument();
+  });
+
+  it("shows both field errors when both fields fail validation", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: /tambah catatan/i }));
+    await user.type(screen.getByLabelText(/title/i), "a".repeat(51));
+    await user.type(screen.getByLabelText(/content/i), "ab");
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
     expect(screen.getByText(ERROR_TITLE_TOO_LONG)).toBeInTheDocument();
     expect(screen.getByText(ERROR_CONTENT_TOO_SHORT)).toBeInTheDocument();
+  });
 
-    // No note added
-    expect(screen.getByText("Daftar Catatan (0)")).toBeInTheDocument();
-    expect(screen.queryByTestId("note-card")).not.toBeInTheDocument();
+  it("cancels editing and returns to the list without changing the note", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createNote(user, "Tetap sama", "Isi tetap sama");
+
+    await user.click(
+      screen.getByRole("button", { name: /edit catatan tetap sama/i }),
+    );
+    await user.clear(screen.getByLabelText(/title/i));
+    await user.type(screen.getByLabelText(/title/i), "Perubahan dibatalkan");
+    await user.click(screen.getByRole("button", { name: /batal/i }));
+
+    expect(screen.getByText("Tetap sama")).toBeInTheDocument();
+    expect(screen.queryByText("Perubahan dibatalkan")).not.toBeInTheDocument();
+  });
+
+  it("does not save invalid edits and keeps the edit form open", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createNote(user, "Judul valid", "Isi yang valid");
+
+    await user.click(
+      screen.getByRole("button", { name: /edit catatan judul valid/i }),
+    );
+    await user.clear(screen.getByLabelText(/title/i));
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(screen.getByText(ERROR_TITLE_EMPTY)).toBeInTheDocument();
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /batal/i }));
+    expect(screen.getByText("Judul valid")).toBeInTheDocument();
   });
 });

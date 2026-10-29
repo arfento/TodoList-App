@@ -1,12 +1,19 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import type { Note } from '../types/note'
+import { createId } from '../utils/id'
+import type { Note, NoteInput } from '../types/note'
 
 /** Nilai yang disediakan oleh Note_Context. */
 export interface NoteContextValue {
   /** Daftar catatan yang tersimpan. */
   notes: Note[]
-  /** Menambahkan Note baru ke daftar catatan. */
-  addNote: (note: Note) => void
+  /**
+   * Menambahkan Note baru ke daftar catatan.
+   * Provider membuat `id` dan `createdAt`; pemanggil hanya menyediakan isi.
+   * Mengembalikan Note yang baru dibuat.
+   */
+  addNote: (input: NoteInput) => Note
+  /** Mengubah title dan content Note yang sudah ada tanpa mengubah id/createdAt. */
+  updateNote: (id: string, input: NoteInput) => void
 }
 
 /**
@@ -18,21 +25,38 @@ export const NoteContext = createContext<NoteContextValue | undefined>(undefined
 
 /**
  * React Context Provider yang menyimpan daftar catatan dan
- * menyediakan fungsi `addNote`.
- *
- * Catatan: `addNote` menerima objek `Note` lengkap (id, title, content,
- * createdAt) yang sudah dibangun oleh pemanggil (mis. NoteForm). Provider
- * hanya menambahkannya ke state.
+ * menyediakan fungsi `addNote` serta `updateNote`.
  */
 export function NoteProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>([])
 
-  const addNote = (note: Note) => {
+  const addNote = (input: NoteInput): Note => {
+    const note: Note = {
+      id: createId(),
+      title: input.title.trim(),
+      content: input.content.trim(),
+      createdAt: new Date().toISOString(),
+    }
     setNotes((prev) => [...prev, note])
+    return note
+  }
+
+  const updateNote = (id: string, input: NoteInput) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id
+          ? {
+              ...note,
+              title: input.title.trim(),
+              content: input.content.trim(),
+            }
+          : note,
+      ),
+    )
   }
 
   return (
-    <NoteContext.Provider value={{ notes, addNote }}>
+    <NoteContext.Provider value={{ notes, addNote, updateNote }}>
       {children}
     </NoteContext.Provider>
   )

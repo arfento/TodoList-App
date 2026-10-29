@@ -3,6 +3,12 @@ import { renderHook, act } from "@testing-library/react";
 import { NoteProvider, useNotes } from "./NoteContext";
 import type { Note } from "../types/note";
 
+function useNotesWithProvider() {
+  return renderHook(() => useNotes(), {
+    wrapper: ({ children }) => <NoteProvider>{children}</NoteProvider>,
+  });
+}
+
 describe("NoteContext", () => {
   it("throws an error when useNotes is used outside a NoteProvider", () => {
     // Suppress console.error from React during expected error throw
@@ -17,44 +23,86 @@ describe("NoteContext", () => {
   });
 
   it("provides empty notes array initially", () => {
-    const { result } = renderHook(() => useNotes(), {
-      wrapper: ({ children }) => <NoteProvider>{children}</NoteProvider>,
-    });
+    const { result } = useNotesWithProvider();
 
     expect(result.current.notes).toEqual([]);
   });
 
-  it("adds note to notes list when addNote is called", () => {
-    const { result } = renderHook(() => useNotes(), {
-      wrapper: ({ children }) => <NoteProvider>{children}</NoteProvider>,
+  it("creates a note with a generated id and ISO createdAt timestamp", () => {
+    const { result } = useNotesWithProvider();
+    let created: Note | undefined;
+
+    act(() => {
+      created = result.current.addNote({
+        title: "Test Note Title",
+        content: "Test Note Content",
+      });
     });
 
-    const sampleNote: Note = {
-      id: "test-id-123",
+    expect(created).toMatchObject({
       title: "Test Note Title",
       content: "Test Note Content",
-      createdAt: "2026-10-29T12:00:00.000Z",
-    };
-
-    act(() => {
-      result.current.addNote(sampleNote);
     });
+    expect(created?.id).toBeTruthy();
+    expect(created?.createdAt).toBe(new Date(created!.createdAt).toISOString());
+    expect(result.current.notes).toEqual([created]);
+  });
 
-    expect(result.current.notes).toHaveLength(1);
-    expect(result.current.notes[0]).toEqual(sampleNote);
-
-    const secondNote: Note = {
-      id: "test-id-456",
-      title: "Second Note Title",
-      content: "Second Note Content",
-      createdAt: "2026-10-29T12:01:00.000Z",
-    };
+  it("appends new notes in order", () => {
+    const { result } = useNotesWithProvider();
 
     act(() => {
-      result.current.addNote(secondNote);
+      result.current.addNote({ title: "First", content: "First content" });
+      result.current.addNote({ title: "Second", content: "Second content" });
     });
 
     expect(result.current.notes).toHaveLength(2);
-    expect(result.current.notes[1]).toEqual(secondNote);
+    expect(result.current.notes[0].title).toBe("First");
+    expect(result.current.notes[1].title).toBe("Second");
+  });
+
+  it("updates a note in place while preserving its id and createdAt", () => {
+    const { result } = useNotesWithProvider();
+    let created: Note | undefined;
+
+    act(() => {
+      created = result.current.addNote({
+        title: "Original title",
+        content: "Original content",
+      });
+    });
+
+    act(() => {
+      result.current.updateNote(created!.id, {
+        title: "Updated title",
+        content: "Updated content",
+      });
+    });
+
+    expect(result.current.notes).toHaveLength(1);
+    expect(result.current.notes[0]).toEqual({
+      id: created!.id,
+      title: "Updated title",
+      content: "Updated content",
+      createdAt: created!.createdAt,
+    });
+  });
+
+  it("ignores updates for an unknown note id", () => {
+    const { result } = useNotesWithProvider();
+
+    act(() => {
+      result.current.addNote({ title: "Keep", content: "Keep content" });
+    });
+
+    act(() => {
+      result.current.updateNote("missing-id", {
+        title: "Changed",
+        content: "Changed content",
+      });
+    });
+
+    expect(result.current.notes).toHaveLength(1);
+    expect(result.current.notes[0].title).toBe("Keep");
   });
 });
