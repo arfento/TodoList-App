@@ -11,7 +11,7 @@ Fitur "Tambah Catatan Baru" memungkinkan pengguna untuk menulis catatan baru bes
 - **Note_Form**: Komponen formulir yang menampilkan kolom input Title, kolom input Content, dan tombol Save untuk menambahkan catatan baru.
 - **Note_Context**: React Context yang mengelola state daftar catatan, termasuk penambahan catatan baru.
 - **Title**: Field judul dari sebuah Note, wajib diisi dengan panjang maksimal 50 karakter.
-- **Content**: Field isi dari sebuah Note, minimal 10 karakter.
+- **Content**: Field isi dari sebuah Note, minimal 3 dan maksimal 50 karakter.
 - **Save_Button**: Tombol pada Note_Form yang diklik pengguna untuk menyimpan catatan baru.
 - **Error_Message**: Pesan kesalahan validasi berwarna merah yang ditampilkan di bawah kolom input yang gagal validasi.
 
@@ -39,13 +39,14 @@ Fitur "Tambah Catatan Baru" memungkinkan pengguna untuk menulis catatan baru bes
 
 ### Requirement 3: Validasi Isi Catatan
 
-**User Story:** Sebagai pengguna, saya ingin isi catatan divalidasi, agar setiap catatan memiliki konten yang cukup.
+**User Story:** Sebagai pengguna, saya ingin isi catatan divalidasi, agar setiap catatan memiliki konten yang cukup dan tidak terlalu panjang.
 
 #### Acceptance Criteria
 
-1. WHEN Save_Button diklik dan panjang teks Content kurang dari 10 karakter, THE Note_Form SHALL menampilkan Error_Message berwarna merah di bawah kolom input Content yang menunjukkan bahwa panjang teks Content belum mencapai batas minimum 10 karakter serta tidak menyimpan catatan.
-2. WHEN pengguna mengubah kolom input Content sehingga panjang teks mencapai 10 karakter atau lebih, THE Note_Form SHALL menghapus Error_Message di bawah kolom input Content.
-3. WHEN Save_Button diklik dan panjang teks Content mencapai 10 karakter atau lebih, THE Note_Form SHALL tidak menampilkan Error_Message di bawah kolom input Content.
+1. WHEN Save_Button diklik dan panjang teks Content kurang dari 3 karakter, THE Note_Form SHALL menampilkan Error_Message berwarna merah di bawah kolom input Content yang menunjukkan bahwa panjang teks Content belum mencapai batas minimum 3 karakter serta tidak menyimpan catatan.
+2. WHEN Save_Button diklik dan panjang teks Content melebihi 50 karakter, THE Note_Form SHALL menampilkan Error_Message berwarna merah di bawah kolom input Content yang menunjukkan bahwa panjang teks Content melebihi batas maksimum 50 karakter serta tidak menyimpan catatan.
+3. WHEN pengguna mengubah kolom input Content sehingga panjang teks berada dalam rentang 3 hingga 50 karakter, THE Note_Form SHALL menghapus Error_Message di bawah kolom input Content.
+4. WHEN Save_Button diklik dan panjang teks Content berada dalam rentang 3 hingga 50 karakter, THE Note_Form SHALL tidak menampilkan Error_Message di bawah kolom input Content.
 
 ### Requirement 4: Menyimpan Catatan Baru
 

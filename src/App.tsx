@@ -1,10 +1,15 @@
+import { NoteProvider } from './context/NoteContext'
+import { NoteForm } from './components/NoteForm'
 import styles from './App.module.css'
 
 function App() {
   return (
-    <div className={styles.app}>
-      <h1>TodoList App</h1>
-    </div>
+    <NoteProvider>
+      <div className={styles.app}>
+        <h1>TodoList App</h1>
+        <NoteForm />
+      </div>
+    </NoteProvider>
   )
 }
 

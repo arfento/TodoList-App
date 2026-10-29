@@ -2,7 +2,7 @@
 
 ## Overview
 
-Fitur "Tambah Catatan Baru" menyediakan formulir bagi pengguna untuk menambahkan catatan baru ke daftar catatan. Formulir terdiri dari kolom input Title, kolom input Content, dan tombol Save. Sistem memvalidasi input sebelum menyimpan: Title wajib diisi dengan panjang 1 hingga 50 karakter, dan Content minimal 10 karakter. Jika validasi gagal, pesan error berwarna merah ditampilkan di bawah kolom yang gagal dan catatan tidak disimpan. Jika validasi lulus, catatan baru ditambahkan ke `Note_Context` dan kolom input dikosongkan beserta pesan error-nya.
+Fitur "Tambah Catatan Baru" menyediakan formulir bagi pengguna untuk menambahkan catatan baru ke daftar catatan. Formulir terdiri dari kolom input Title, kolom input Content, dan tombol Save. Sistem memvalidasi input sebelum menyimpan: Title wajib diisi dengan panjang 1 hingga 50 karakter, dan Content minimal 3 dan maksimal 50 karakter. Jika validasi gagal, pesan error berwarna merah ditampilkan di bawah kolom yang gagal dan catatan tidak disimpan. Jika validasi lulus, catatan baru ditambahkan ke `Note_Context` dan kolom input dikosongkan beserta pesan error-nya.
 
 Stack yang digunakan: React dengan TypeScript, React Context API untuk manajemen state, dan CSS Modules untuk styling. Validasi diekstrak sebagai **fungsi murni (pure functions)** yang terpisah dari komponen UI agar mudah diuji secara terisolasi menggunakan property-based testing, sementara interaksi UI diuji dengan contoh (example-based) dan integration test.
 
@@ -101,7 +101,8 @@ Modul fungsi murni tanpa dependensi React.
 
 ```typescript
 export const TITLE_MAX_LENGTH = 50;
-export const CONTENT_MIN_LENGTH = 10;
+export const CONTENT_MIN_LENGTH = 3;
+export const CONTENT_MAX_LENGTH = 50;
 
 export interface ValidationResult {
   valid: boolean;
@@ -114,7 +115,7 @@ export function validateContent(content: string): ValidationResult;
 
 Aturan:
 - `validateTitle`: `valid = true` jika `1 ≤ title.trim().length ≤ 50`. Jika tidak valid, `error` menjelaskan penyebabnya (kosong atau melebihi 50 karakter).
-- `validateContent`: `valid = true` jika `content.trim().length ≥ 10`. Jika tidak valid, `error` menyebutkan bahwa panjang belum mencapai batas minimum 10 karakter.
+- `validateContent`: `valid = true` jika `3 ≤ content.trim().length ≤ 50`. Jika tidak valid, `error` menjelaskan penyebabnya (kurang dari 3 karakter atau melebihi 50 karakter).
 
 ### ID Utility (`id.ts`)
 
@@ -133,7 +134,7 @@ Struktur catatan yang disimpan di `Note_Context`.
 interface Note {
   id: string;        // unik, dari createId()
   title: string;     // nilai title yang sudah di-trim, 1..50 karakter
-  content: string;   // nilai content yang sudah di-trim, >= 10 karakter
+  content: string;   // nilai content yang sudah di-trim, 3..50 karakter
   createdAt: string; // ISO 8601 timestamp, dari new Date().toISOString()
 }
 ```
@@ -153,7 +154,8 @@ interface NoteFormState {
 
 ```typescript
 const TITLE_MAX_LENGTH = 50;
-const CONTENT_MIN_LENGTH = 10;
+const CONTENT_MIN_LENGTH = 3;
+const CONTENT_MAX_LENGTH = 50;
 
 interface ValidationResult {
   valid: boolean;
@@ -166,7 +168,8 @@ interface ValidationResult {
 ```typescript
 const ERROR_TITLE_EMPTY = "Judul tidak boleh kosong.";
 const ERROR_TITLE_TOO_LONG = "Judul tidak boleh lebih dari 50 karakter.";
-const ERROR_CONTENT_TOO_SHORT = "Isi catatan minimal 10 karakter.";
+const ERROR_CONTENT_TOO_SHORT = "Isi catatan minimal 3 karakter.";
+const ERROR_CONTENT_TOO_LONG = "Isi catatan tidak boleh lebih dari 50 karakter.";
 ```
 
 ## Correctness Properties
@@ -183,7 +186,7 @@ Setelah menelaah setiap acceptance criteria dan melakukan property reflection, d
 
 ### Property 2: Content validation correctness
 
-*For any* string `content`, `validateContent(content).valid` is `true` if and only if `content.trim().length ≥ 10`; otherwise `valid` is `false` and `error` menyebutkan bahwa panjang belum mencapai batas minimum 10 karakter.
+*For any* string `content`, `validateContent(content).valid` is `true` if and only if `3 ≤ content.trim().length ≤ 50`; otherwise `valid` is `false` and `error` menjelaskan penyebabnya (kurang dari 3 karakter atau melebihi 50 karakter).
 
 **Validates: Requirements 3.1, 3.2, 3.3**
 
@@ -211,8 +214,9 @@ Setelah menelaah setiap acceptance criteria dan melakukan property reflection, d
 |----------|-----------|
 | Title kosong / whitespace-only saat Save | Tampilkan `ERROR_TITLE_EMPTY` di bawah input Title; jangan simpan. |
 | Title > 50 karakter saat Save | Tampilkan `ERROR_TITLE_TOO_LONG` di bawah input Title; jangan simpan. |
-| Content < 10 karakter saat Save | Tampilkan `ERROR_CONTENT_TOO_SHORT` di bawah input Content; jangan simpan. |
-| Field diperbaiki menjadi valid setelah error | Hapus Error_Message field tersebut segera (umpan balik langsung), sesuai Requirement 2.3 dan 3.2. |
+| Content < 3 karakter saat Save | Tampilkan `ERROR_CONTENT_TOO_SHORT` di bawah input Content; jangan simpan. |
+| Content > 50 karakter saat Save | Tampilkan `ERROR_CONTENT_TOO_LONG` di bawah input Content; jangan simpan. |
+| Field diperbaiki menjadi valid setelah error | Hapus Error_Message field tersebut segera (umpan balik langsung), sesuai Requirement 2.3 dan 3.3. |
 | `useNotes` dipanggil di luar `NoteProvider` | Lempar `Error` dengan pesan "useNotes must be used within a NoteProvider" agar kesalahan wiring terdeteksi saat development. |
 | `crypto.randomUUID` tidak tersedia | Fallback ke `Date.now() + Math.random()` agar `id` tetap unik. |
 | Validasi kedua field gagal bersamaan | Tampilkan Error_Message di kedua field; jangan simpan. |
@@ -244,14 +248,14 @@ Pemetaan implementasi:
 
 - **Property 1 & 2** — diuji langsung terhadap fungsi murni `validateTitle`/`validateContent` dengan generator string `fast-check` (`fc.string()`, `fc.stringMatching`, atau custom arbiter untuk whitespace-only dan panjang tertentu). Biaya rendah (fungsi murni di memori) sehingga cocok untuk PBT murni.
 - **Property 3, 4, 5** — diuji pada level komponen dengan `@testing-library/react` dalam `NoteProvider` test wrapper, menggunakan generator `fast-check` untuk pasangan `(title, content)` valid/invalid. Input diisi via `userEvent.type`, tombol Save diklik, lalu assertions pada daftar catatan dan state form.
-- **Edge case yang harus tercakup oleh generator**: string kosong, whitespace-only, string dengan panjang tepat di batas (9, 10, 50, 51), karakter non-ASCII/unicode, dan leading/trailing whitespace.
+- **Edge case yang harus tercakup oleh generator**: string kosong, whitespace-only, string dengan panjang tepat di batas (2, 3, 50, 51), karakter non-ASCII/unicode, dan leading/trailing whitespace.
 
 ### Unit Tests (Example-Based)
 
 - Render formulir memuat ketiga elemen (Title input, Content input, Save button) — Requirement 1.1.
 - Controlled input: mengetik di Title/Content memperbarui nilai yang ditampilkan — Requirement 1.2, 1.3.
-- Pesan error merah muncul di bawah field yang gagal saat Save diklik dengan input kosong/invalid — Requirement 2.1, 2.2, 3.1.
-- Error hilang saat field diperbaiki — Requirement 2.3, 3.2.
+- Pesan error merah muncul di bawah field yang gagal saat Save diklik dengan input kosong/invalid — Requirement 2.1, 2.2, 3.1, 3.2.
+- Error hilang saat field diperbaiki — Requirement 2.3, 3.3.
 - Setelah simpan berhasil, input dikosongkan dan tidak ada error — Requirement 4.2.
 - `useNotes` melempar error bila dipakai di luar provider — error handling.
 
