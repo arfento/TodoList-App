@@ -108,7 +108,7 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
     - Verifikasi Error_Message menggunakan class CSS yang menandakan warna merah
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 4.2_
 
-- [ ] 5. Checkpoint - Pastikan semua tes lulus
+- [x] 5. Checkpoint - Pastikan semua tes lulus
   - Pastikan semua tes lulus, tanyakan pengguna jika ada pertanyaan.
 
 - [x] 6. Integrasikan dan hubungkan komponen
@@ -123,7 +123,7 @@ Implementasi fitur "Tambah Catatan Baru" mengikuti arsitektur pada design docume
     - Tes kedua field gagal bersamaan → error di kedua field
     - _Requirements: 4.1, 4.2, 5.1, 5.2_
 
-- [ ] 7. Checkpoint akhir - Pastikan semua tes lulus
+- [x] 7. Checkpoint akhir - Pastikan semua tes lulus
   - Pastikan semua tes lulus, tanyakan pengguna jika ada pertanyaan.
 
 ## Notes

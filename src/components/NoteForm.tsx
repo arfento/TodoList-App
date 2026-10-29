@@ -1,9 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNotes } from '../context/NoteContext'
-import { createId } from '../utils/id'
-import { validateTitle, validateContent } from '../logic/validation'
-import type { Note } from '../types/note'
-import styles from './NoteForm.module.css'
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useNotes } from "../context/NoteContext";
+import { createId } from "../utils/id";
+import { validateTitle, validateContent } from "../logic/validation";
+import type { Note } from "../types/note";
+import styles from "./NoteForm.module.css";
 
 /**
  * Formulir untuk menambahkan catatan baru.
@@ -17,42 +17,47 @@ import styles from './NoteForm.module.css'
  * menjadi valid, pesan error untuk field tersebut dihapus.
  */
 export function NoteForm() {
-  const { addNote } = useNotes()
-  const [titleValue, setTitleValue] = useState('')
-  const [contentValue, setContentValue] = useState('')
-  const [titleError, setTitleError] = useState<string | null>(null)
-  const [contentError, setContentError] = useState<string | null>(null)
+  const { addNote } = useNotes();
+  const [titleValue, setTitleValue] = useState("");
+  const [contentValue, setContentValue] = useState("");
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
 
   /** Perbarui Title dan hapus error bila nilai baru menjadi valid. */
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setTitleValue(value)
+    const value = e.target.value;
+    setTitleValue(value);
     if (titleError && validateTitle(value).valid) {
-      setTitleError(null)
+      setTitleError(null);
     }
-  }
+  };
 
   /** Perbarui Content dan hapus error bila nilai baru menjadi valid. */
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    setContentValue(value)
+    const value = e.target.value;
+    setContentValue(value);
     if (contentError && validateContent(value).valid) {
-      setContentError(null)
+      setContentError(null);
     }
-  }
+  };
 
   /** Validasi kedua field saat Save diklik; simpan catatan bila keduanya valid. */
   const handleSave = (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const titleResult = validateTitle(titleValue)
-    const contentResult = validateContent(contentValue)
+    const titleResult = validateTitle(titleValue);
+    const contentResult = validateContent(contentValue);
 
     if (!titleResult.valid) {
-      setTitleError(titleResult.error!)
+      setTitleError(titleResult.error!);
+    } else {
+      setTitleError(null);
     }
+
     if (!contentResult.valid) {
-      setContentError(contentResult.error!)
+      setContentError(contentResult.error!);
+    } else {
+      setContentError(null);
     }
 
     // Hanya simpan bila kedua validasi lulus.
@@ -62,16 +67,16 @@ export function NoteForm() {
         title: titleValue.trim(),
         content: contentValue.trim(),
         createdAt: new Date().toISOString(),
-      }
-      addNote(note)
+      };
+      addNote(note);
 
       // Reset seluruh state form.
-      setTitleValue('')
-      setContentValue('')
-      setTitleError(null)
-      setContentError(null)
+      setTitleValue("");
+      setContentValue("");
+      setTitleError(null);
+      setContentError(null);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSave} className={styles.form}>
@@ -96,5 +101,5 @@ export function NoteForm() {
       </div>
       <button type="submit">Save</button>
     </form>
-  )
+  );
 }
